@@ -1,0 +1,129 @@
+@startuml
+class DashboardKpis {
+    + OpenCount : int <<get>> <<set>>
+    + ClosedCount : int <<get>> <<set>>
+    + AvgResolutionDays : decimal? <<get>> <<set>>
+}
+class ErrorModel {
+    + RequestId : string? <<get>> <<set>>
+    + ShowRequestId : bool <<get>>
+    + ErrorModel(logger:ILogger<ErrorModel>)
+    + OnGet() : void
+}
+class "ILogger`1"<T> {
+}
+PageModel <|-- ErrorModel
+ErrorModel --> "_logger<ErrorModel>" "ILogger`1"
+class IndexModel {
+    + OpenCount : int <<get>>
+    + ClosedCount : int <<get>>
+    + AvgResolutionDays : decimal? <<get>>
+    + IndexModel(connection:SqlConnection)
+    + <<async>> OnGet() : Task
+}
+class AgingRow {
+    + id : int <<get>> <<set>>
+    + rma_number : string <<get>> <<set>>
+    + customer_id : int <<get>> <<set>>
+    + status : string <<get>> <<set>>
+    + age_days : int <<get>> <<set>>
+    + customer_name : string <<get>> <<set>>
+}
+class "List`1"<T> {
+}
+PageModel <|-- IndexModel
+IndexModel --> "_connection" SqlConnection
+IndexModel o-> "AgingTop<AgingRow>" "List`1"
+IndexModel +-- AgingRow
+AgingRow --> "opened_at" DateTime
+class PrivacyModel {
+    + PrivacyModel(logger:ILogger<PrivacyModel>)
+    + OnGet() : void
+}
+class "ILogger`1"<T> {
+}
+PageModel <|-- PrivacyModel
+PrivacyModel --> "_logger<PrivacyModel>" "ILogger`1"
+class CreateModel {
+    + CreateModel(connection:SqlConnection)
+    + ErrorMessage : string? <<get>>
+    + <<async>> OnGet() : Task
+    + <<async>> OnPost() : Task<IActionResult>
+}
+class "List`1"<T> {
+}
+class CustomerOption {
+    + id : int <<get>> <<set>>
+    + name : string <<get>> <<set>> = ""
+}
+class ProductOption {
+    + id : int <<get>> <<set>>
+    + sku : string <<get>> <<set>> = ""
+    + name : string <<get>> <<set>> = ""
+}
+PageModel <|-- CreateModel
+CreateModel --> "_connection" SqlConnection
+CreateModel o-> "Customers<CustomerOption>" "List`1"
+CreateModel o-> "Products<ProductOption>" "List`1"
+CreateModel +-- CustomerOption
+CreateModel +-- ProductOption
+class DetailModel {
+    + DetailModel(connection:SqlConnection)
+    + Id : int <<get>> <<set>>
+    + <<async>> OnGet() : Task<IActionResult>
+    + <<async>> OnPostClose() : Task<IActionResult>
+    + <<async>> OnPostDelete() : Task<IActionResult>
+    + <<async>> OnPostUpdateItem(itemId:int, resolution:string?, closeNow:bool) : Task<IActionResult>
+    + <<async>> OnPostUpdateStatus(id:int, status:string) : Task<IActionResult>
+    - <<async>> LoadAsync() : Task
+}
+class RmaHeader {
+    + id : int <<get>> <<set>>
+    + rma_number : string <<get>> <<set>>
+    + customer_id : int <<get>> <<set>>
+    + customer_name : string <<get>> <<set>>
+    + status : string <<get>> <<set>>
+    + notes : string? <<get>> <<set>>
+}
+class RmaItem {
+    + id : int <<get>> <<set>>
+    + product_id : int <<get>> <<set>>
+    + sku : string <<get>> <<set>>
+    + product_name : string <<get>> <<set>>
+    + qty : int <<get>> <<set>>
+    + reason_code : string? <<get>> <<set>>
+    + resolution : string? <<get>> <<set>>
+}
+class "List`1"<T> {
+}
+PageModel <|-- DetailModel
+DetailModel --> "_connection" SqlConnection
+DetailModel --> "Header" RmaHeader
+DetailModel o-> "Items<RmaItem>" "List`1"
+DetailModel +-- RmaHeader
+RmaHeader --> "opened_at" DateTime
+DetailModel +-- RmaItem
+RmaItem --> "closed_at" DateTime
+class IndexModel {
+    + Status : string? <<get>> <<set>>
+    + MinDays : int? <<get>> <<set>>
+    + MaxDays : int? <<get>> <<set>>
+    + IndexModel(connection:SqlConnection)
+    + <<async>> OnGet() : Task
+}
+class RmaListRow {
+    + id : int <<get>> <<set>>
+    + rma_number : string <<get>> <<set>>
+    + customer_id : int <<get>> <<set>>
+    + customer_name : string <<get>> <<set>>
+    + status : string <<get>> <<set>>
+    + age_days : int <<get>> <<set>>
+}
+class "List`1"<T> {
+}
+PageModel <|-- IndexModel
+IndexModel --> "_connection" SqlConnection
+IndexModel o-> "Rows<RmaListRow>" "List`1"
+IndexModel +-- RmaListRow
+RmaListRow --> "opened_at" DateTime
+@enduml

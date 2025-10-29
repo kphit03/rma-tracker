@@ -1,0 +1,24 @@
+@startuml
+class IndexModel {
+    + OpenCount : int <<get>>
+    + ClosedCount : int <<get>>
+    + AvgResolutionDays : decimal? <<get>>
+    + IndexModel(connection:SqlConnection)
+    + <<async>> OnGet() : Task
+}
+class AgingRow {
+    + id : int <<get>> <<set>>
+    + rma_number : string <<get>> <<set>>
+    + customer_id : int <<get>> <<set>>
+    + status : string <<get>> <<set>>
+    + age_days : int <<get>> <<set>>
+    + customer_name : string <<get>> <<set>>
+}
+class "List`1"<T> {
+}
+PageModel <|-- IndexModel
+IndexModel --> "_connection" SqlConnection
+IndexModel o-> "AgingTop<AgingRow>" "List`1"
+IndexModel +-- AgingRow
+AgingRow --> "opened_at" DateTime
+@enduml

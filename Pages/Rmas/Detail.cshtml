@@ -1,0 +1,168 @@
+﻿@page "{id:int}"
+@model RmaTracker.Pages.Rmas.DetailModel
+@{
+    ViewData["Title"] = "RMA Detail";
+
+    // Safe, single place to compute closed state (handles null header)
+    var isClosed = Model.Header != null &&
+                   string.Equals(Model.Header.status, "closed", StringComparison.OrdinalIgnoreCase);
+}
+
+<div class="container mt-4">
+    <h2>RMA Detail</h2>
+
+    @* Read-only banner when closed *@
+    @if (isClosed)
+    {
+        <div class="alert alert-secondary py-2 my-3" role="alert">
+            This RMA is closed. Item resolutions are read-only.
+        </div>
+    }
+
+    @if (Model.Header == null)
+    {
+        <div class="alert alert-warning mt-3" role="alert">
+            No RMA found with ID @Model.Id. Try creating an RMA first.
+        </div>
+    }
+    else
+    {
+        <!-- Action bar -->
+        <div class="d-flex gap-2 justify-content-end mb-3">
+            @if (!isClosed)
+            {
+                <form method="post" asp-page-handler="Close" class="d-inline" onsubmit="return confirm('Close this RMA now?');">
+                    <button type="submit" class="btn btn-outline-primary btn-sm">Close RMA</button>
+                </form>
+            }
+            <form method="post" asp-page-handler="Delete" class="d-inline" onsubmit="return confirm('Delete this RMA permanently? This cannot be undone.');">
+                <button type="submit" class="btn btn-outline-danger btn-sm">Delete RMA</button>
+            </form>
+        </div>
+
+        <!-- Header card -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h4 class="mb-1">RMA @Model.Header.rma_number</h4>
+                        <div class="text-muted">
+                            <span class="me-3"><strong>Customer:</strong> @Model.Header.customer_name</span>
+                            <span class="me-3">
+                                <strong>Status:</strong>
+
+                                @if (!isClosed)
+                                {
+                                    <form method="post" asp-page-handler="UpdateStatus" class="d-inline ms-1">
+                                        <input type="hidden" name="id" value="@Model.Id" />
+                                        <select name="status"
+                                                class="form-select form-select-sm d-inline-block"
+                                                style="width:auto; display:inline-block; vertical-align:middle;">
+                                            <option value="open" selected="@(Model.Header.status.Equals("open", StringComparison.OrdinalIgnoreCase) ? "selected" : null)">open</option>
+                                            <option value="pending" selected="@(Model.Header.status.Equals("pending", StringComparison.OrdinalIgnoreCase) ? "selected" : null)">pending</option>
+                                        </select>
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary ms-1">Save</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="badge @(Model.Header.status=="open"
+                                                      ? "bg-success-subtle text-success border border-success"
+                                                      : Model.Header.status == "pending"
+                                                          ? "bg-warning-subtle text-warning border border-warning"
+                                                          : "bg-secondary-subtle text-secondary border border-secondary")">
+                                @Model.Header.status
+                            </span>
+                                                        }
+                            </span>
+
+                        <span class="me-3"><strong>Opened:</strong> @Model.Header.opened_at.ToString("yyyy-MM-dd")</span>
+                    </div>
+                </div>
+                <div>
+                    <a asp-page="/Rmas/Index" class="btn btn-outline-secondary btn-sm">Back to RMAs</a>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Header.notes))
+                {
+                    <hr />
+                    <div>
+                        <strong>Notes:</strong>
+                        <div class="mt-1">@Model.Header.notes</div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Items table with simplified resolution workflow -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Items</h5>
+
+                @if ((Model.Items?.Count ?? 0) == 0)
+                {
+                    <div class="alert alert-secondary" role="alert">
+                        No items on this RMA.
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped table-sm align-middle">
+                            <thead>
+                                <tr>
+                                    <th>SKU</th>
+                                    <th>Product</th>
+                                    <th class="text-end">Qty</th>
+                                    <th>Reason</th>
+                                    <th>Resolution</th>
+                                    <th>Closed At</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var it in Model.Items)
+                                {
+                                    <tr>
+                                        <td>@it.sku</td>
+                                        <td>@it.product_name</td>
+                                        <td class="text-end">@it.qty</td>
+                                        <td>@it.reason_code</td>
+
+                                        <!-- Resolution editing cell -->
+                                        <td class="text-capitalize">
+                                            <form method="post" asp-page-handler="UpdateItem" class="d-flex gap-1 align-items-center">
+                                                <input type="hidden" name="itemId" value="@it.id" />
+
+                                                <select name="resolution"
+                                                        class="form-select form-select-sm"
+                                                        style="min-width: 110px;"
+                                                        disabled="@isClosed">
+                                                    <option value="" selected="@(string.IsNullOrWhiteSpace(it.resolution) ? "selected" : null)">(none)</option>
+                                                    <option value="refund" selected="@(it.resolution?.Equals("refund", StringComparison.OrdinalIgnoreCase) == true ? "selected" : null)">refund</option>
+                                                    <option value="replace" selected="@(it.resolution?.Equals("replace", StringComparison.OrdinalIgnoreCase) == true ? "selected" : null)">replace</option>
+                                                    <option value="repair" selected="@(it.resolution?.Equals("repair", StringComparison.OrdinalIgnoreCase) == true ? "selected" : null)">repair</option>
+                                                    <option value="deny" selected="@(it.resolution?.Equals("deny", StringComparison.OrdinalIgnoreCase) == true ? "selected" : null)">deny</option>
+                                                </select>
+
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-primary"
+                                                        disabled="@isClosed">
+                                                    Save
+                                                </button>
+                                            </form>
+                                        </td>
+
+                                        <td>@(it.closed_at?.ToString("yyyy-MM-dd") ?? "")</td>
+                                        <td></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

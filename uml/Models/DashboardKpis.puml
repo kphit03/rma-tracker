@@ -1,0 +1,7 @@
+@startuml
+class DashboardKpis {
+    + OpenCount : int <<get>> <<set>>
+    + ClosedCount : int <<get>> <<set>>
+    + AvgResolutionDays : decimal? <<get>> <<set>>
+}
+@enduml

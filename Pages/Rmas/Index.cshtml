@@ -1,0 +1,94 @@
+﻿@page
+@model RmaTracker.Pages.Rmas.IndexModel
+@{
+    ViewData["Title"] = "RMAs";
+}
+
+<div class="container mt-4">
+    <h2>RMAs</h2>
+    <!-- FILTER RESULTS -->
+    <form method="get" class="row g-3 align-items-end mt-2">
+        <div class="col-12 col-sm-4 col-md-3">
+            <label for="status" class="form-label">Status</label>
+            <select id="status" name="Status" class="form-select">
+                <option value="" selected="@(string.IsNullOrWhiteSpace(Model.Status) ? "selected" : null)">All</option>
+                <option value="open" selected="@(Model.Status == "open" ? "selected" : null)">Open</option>
+                <option value="pending" selected="@(Model.Status == "pending" ? "selected" : null)">Pending</option>
+                <option value="closed" selected="@(Model.Status == "closed" ? "selected" : null)">Closed</option>
+            </select>
+        </div>
+
+        <div class="col-6 col-sm-4 col-md-3">
+            <label for="minDays" class="form-label">Min Age (days)</label>
+            <input id="minDays" name="MinDays" type="number" min="0" class="form-control"
+                   value="@(Model.MinDays?.ToString() ?? "")" />
+        </div>
+
+        <div class="col-6 col-sm-4 col-md-3">
+            <label for="maxDays" class="form-label">Max Age (days)</label>
+            <input id="maxDays" name="MaxDays" type="number" min="0" class="form-control"
+                   value="@(Model.MaxDays?.ToString() ?? "")" />
+        </div>
+
+        <div class="col-12 col-md-3 d-grid">
+            <button type="submit" class="btn btn-primary">Apply Filters</button>
+        </div>
+    </form>
+
+    @if ((Model.Rows?.Count ?? 0) == 0)
+    {
+        <div class="alert alert-secondary mt-3" role="alert">
+            No RMAs to display yet.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive mt-3">
+            <table class="table table-striped table-sm table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>RMA #</th>
+                        <th>Customer</th>
+                        <th>Status</th>
+                        <th>Opened</th>
+                        <th>Age (days)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model.Rows)
+                    {
+                        <tr class="row-click"
+                            onclick="location.href='@Url.Page("/Rmas/Detail", new { id = r.id })'">
+
+                            <td>
+                                <strong>
+                                    <a asp-page="/Rmas/Detail"
+                                       asp-route-id="@r.id"
+                                       class="text-decoration-none">
+                                        @r.rma_number
+                                    </a>
+                                </strong>
+                            </td>
+
+                            <td>@r.customer_name</td>
+
+                            <td>
+                                <span class="badge @(r.status=="open"
+                                                          ? "bg-success-subtle text-success border border-success"
+                                                          : r.status == "pending"
+                                                              ? "bg-warning-subtle text-warning border border-warning"
+                                                              : "bg-secondary-subtle text-secondary border border-secondary")">
+                            @r.status
+                        </span>
+                    </td>
+
+                            <td>@r.opened_at.ToString("yyyy-MM-dd")</td>
+                            <td>@r.age_days</td>
+                        </tr>
+                                }
+                </tbody>
+            </table>
+
+        </div>
+    }
+</div>

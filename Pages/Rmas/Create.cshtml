@@ -1,0 +1,65 @@
+﻿@page
+@model RmaTracker.Pages.Rmas.CreateModel
+@{
+    ViewData["Title"] = "Create RMA";
+}
+
+<div class="container mt-4">
+    <h2>Create RMA</h2>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+
+    <form method="post" class="row g-3 mt-2">
+        <!-- RMA Header -->
+        <div class="col-12 col-md-4">
+            <label for="rma_number" class="form-label">RMA Number</label>
+            <input id="rma_number" name="rma_number" class="form-control" required />
+        </div>
+
+        <div class="col-12 col-md-6">
+            <label for="customer_id" class="form-label">Customer</label>
+            <select id="customer_id" name="customer_id" class="form-select" required>
+                @foreach (var c in Model.Customers)
+                {
+                    <option value="@c.id">@c.name</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-12">
+            <label for="notes" class="form-label">Notes (optional)</label>
+            <textarea id="notes" name="notes" class="form-control" rows="2"></textarea>
+        </div>
+
+        <hr class="mt-4" />
+
+        <!-- Single line item -->
+        <div class="col-12 col-md-6">
+            <label for="product_id" class="form-label">Product</label>
+            <select id="product_id" name="product_id" class="form-select" required>
+                @foreach (var p in Model.Products)
+                {
+                    <option value="@p.id">@p.sku - @p.name</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <label for="qty" class="form-label">Qty</label>
+            <input id="qty" name="qty" type="number" min="1" value="1" class="form-control" required />
+        </div>
+
+        <div class="col-6 col-md-3">
+            <label for="reason_code" class="form-label">Reason</label>
+            <input id="reason_code" name="reason_code" class="form-control" required />
+        </div>
+
+        <div class="col-12 d-grid d-md-flex gap-2 mt-3">
+            <button type="submit" class="btn btn-primary">Create RMA</button>
+            <a asp-page="/Rmas/Index" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

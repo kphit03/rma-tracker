@@ -1,0 +1,24 @@
+@startuml
+class IndexModel {
+    + Status : string? <<get>> <<set>>
+    + MinDays : int? <<get>> <<set>>
+    + MaxDays : int? <<get>> <<set>>
+    + IndexModel(connection:SqlConnection)
+    + <<async>> OnGet() : Task
+}
+class RmaListRow {
+    + id : int <<get>> <<set>>
+    + rma_number : string <<get>> <<set>>
+    + customer_id : int <<get>> <<set>>
+    + customer_name : string <<get>> <<set>>
+    + status : string <<get>> <<set>>
+    + age_days : int <<get>> <<set>>
+}
+class "List`1"<T> {
+}
+PageModel <|-- IndexModel
+IndexModel --> "_connection" SqlConnection
+IndexModel o-> "Rows<RmaListRow>" "List`1"
+IndexModel +-- RmaListRow
+RmaListRow --> "opened_at" DateTime
+@enduml

@@ -1,0 +1,25 @@
+@startuml
+class CreateModel {
+    + CreateModel(connection:SqlConnection)
+    + ErrorMessage : string? <<get>>
+    + <<async>> OnGet() : Task
+    + <<async>> OnPost() : Task<IActionResult>
+}
+class "List`1"<T> {
+}
+class CustomerOption {
+    + id : int <<get>> <<set>>
+    + name : string <<get>> <<set>> = ""
+}
+class ProductOption {
+    + id : int <<get>> <<set>>
+    + sku : string <<get>> <<set>> = ""
+    + name : string <<get>> <<set>> = ""
+}
+PageModel <|-- CreateModel
+CreateModel --> "_connection" SqlConnection
+CreateModel o-> "Customers<CustomerOption>" "List`1"
+CreateModel o-> "Products<ProductOption>" "List`1"
+CreateModel +-- CustomerOption
+CreateModel +-- ProductOption
+@enduml

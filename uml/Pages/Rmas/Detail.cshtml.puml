@@ -1,0 +1,39 @@
+@startuml
+class DetailModel {
+    + DetailModel(connection:SqlConnection)
+    + Id : int <<get>> <<set>>
+    + <<async>> OnGet() : Task<IActionResult>
+    + <<async>> OnPostClose() : Task<IActionResult>
+    + <<async>> OnPostDelete() : Task<IActionResult>
+    + <<async>> OnPostUpdateItem(itemId:int, resolution:string?, closeNow:bool) : Task<IActionResult>
+    + <<async>> OnPostUpdateStatus(id:int, status:string) : Task<IActionResult>
+    - <<async>> LoadAsync() : Task
+}
+class RmaHeader {
+    + id : int <<get>> <<set>>
+    + rma_number : string <<get>> <<set>>
+    + customer_id : int <<get>> <<set>>
+    + customer_name : string <<get>> <<set>>
+    + status : string <<get>> <<set>>
+    + notes : string? <<get>> <<set>>
+}
+class RmaItem {
+    + id : int <<get>> <<set>>
+    + product_id : int <<get>> <<set>>
+    + sku : string <<get>> <<set>>
+    + product_name : string <<get>> <<set>>
+    + qty : int <<get>> <<set>>
+    + reason_code : string? <<get>> <<set>>
+    + resolution : string? <<get>> <<set>>
+}
+class "List`1"<T> {
+}
+PageModel <|-- DetailModel
+DetailModel --> "_connection" SqlConnection
+DetailModel --> "Header" RmaHeader
+DetailModel o-> "Items<RmaItem>" "List`1"
+DetailModel +-- RmaHeader
+RmaHeader --> "opened_at" DateTime
+DetailModel +-- RmaItem
+RmaItem --> "closed_at" DateTime
+@enduml
