@@ -9,8 +9,8 @@ Below is the system architecture and database design overview:
 
 | Diagram | Description |
 |----------|--------------|
-| [Architecture Diagram] (Click to open in new tab)<img width="2161" height="737" alt="include" src="https://github.com/user-attachments/assets/62298ef9-28e2-4498-b95f-e6cf2d1123a4" /> | High-level class structure |
-| [Database Diagram] <img width="766" height="726" alt="image" src="https://github.com/user-attachments/assets/3419e150-7b03-433f-b71b-9f4b99a4aad6" /> | ERD of the SQL Server database |
+| [Architecture Diagram] (Click to open in new tab)<img width="2161" height="737" alt="include" src="https://github.com/kphit03/rma-tracker/blob/36859e527046736359488f5068167152a2dd97e8/include.png" /> | High-level class structure |
+| [Database Diagram] <img width="766" height="726" alt="image" src="https://github.com/kphit03/rma-tracker/blob/36859e527046736359488f5068167152a2dd97e8/Screenshot%202025-10-29%20171113.png" /> | ERD of the SQL Server database |
 
 ---
 
